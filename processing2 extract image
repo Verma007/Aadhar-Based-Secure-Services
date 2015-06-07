@@ -1,0 +1,67 @@
+package processing;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.pdfbox.exceptions.CryptographyException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
+
+public class ExtractImage {
+    public static void extractImage(String sourcefilepath,String destinationfilepath,String pass){
+        PDDocument document = null;
+        int count=0;
+                  try
+                  {
+                      document = PDDocument.load(sourcefilepath );
+                      if( document.isEncrypted() )
+                      {
+                          document.decrypt(pass);
+                          document.setAllSecurityToBeRemoved(true);
+                      }
+                      List allPages = document.getDocumentCatalog().getAllPages();                     
+                       Iterator iter = allPages.iterator();  
+         while( iter.hasNext() )  
+         {  
+             PDPage page = (PDPage)iter.next();        //PDF Box Library Functions
+             PDResources resources = page.getResources();  
+             Map images = resources.getXObjects();  
+  
+             if( images != null )  
+             {  
+                 Iterator imageIter = images.keySet().iterator();  
+                 while( imageIter.hasNext() )  
+                 {  
+                     String key = (String)imageIter.next();  
+                     PDXObjectImage image = (PDXObjectImage)images.get( key );      //Decrypt using key 
+                     String imageFileName = destinationfilepath+"/img_"+ count;
+                     if(imageFileName.endsWith("6")||imageFileName.endsWith("7")){   //Write image on disk if it is 7th or 6th image of PDF
+                     image.write2file( imageFileName); 
+                     }
+                     count++;  
+                 }  
+             }  
+        }  
+      
+                  }catch(IOException | CryptographyException E){E.getMessage();}
+                   finally
+                  {
+                      if( document != null )
+                      {
+                          try {
+                              document.close();
+                          } catch (IOException ex) {
+                              Logger.getLogger(ExtractImage.class.getName()).log(Level.SEVERE, null, ex);
+                          }
+                      }
+                  }
+                  
+    }
+    
+    
+}
