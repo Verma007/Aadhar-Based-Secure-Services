@@ -1,0 +1,78 @@
+package bean;
+public class Citizen {
+    private String pin;
+    private String name,fname,dob,add,gen,aadharnumber,imagelocation;
+
+    public String getAadharnumber() {
+        return aadharnumber;
+    }
+
+    public void setAadharnumber(String aadharnumber) {
+        this.aadharnumber = aadharnumber;
+    }
+
+    public String getImagelocation() {
+        return imagelocation;
+    }
+
+    public void setImagelocation(String imagelocation) {
+        this.imagelocation = imagelocation;
+    }
+
+    public String getAadhar() {
+        return aadharnumber;
+    }
+
+    public void setAadhar(String aadharnumber) {
+        this.aadharnumber = aadharnumber;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFname() {
+        return fname;
+    }
+
+    public void setFname(String fname) {
+        this.fname = fname;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
+
+    public String getAdd() {
+        return add;
+    }
+
+    public void setAdd(String add) {
+        this.add = add;
+    }
+
+    public String getGen() {
+        return gen;
+    }
+
+    public void setGen(String gen) {
+        this.gen = gen;
+    }
+    
+}
