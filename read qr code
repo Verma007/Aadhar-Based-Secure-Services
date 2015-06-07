@@ -1,0 +1,36 @@
+package processing;
+
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatReader;
+import com.google.zxing.Result;
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import com.google.zxing.common.HybridBinarizer;
+import java.io.FileInputStream;
+import java.util.Map;
+import javax.imageio.ImageIO;
+
+public class ReadQRCode {
+    
+    /**
+     *
+     * @param filePath
+     * @param charset
+     * @param hintMap
+     * @return
+     * @throws java.lang.Exception
+     */
+    private static FileInputStream fi;
+    public static String readQRCode(String filePath, String charset, Map hintMap)throws Exception{      //Function to Read QR COde using zxing QR reader
+        try{
+		BinaryBitmap binaryBitmap;
+                fi=new FileInputStream(filePath);
+            binaryBitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(ImageIO.read(fi))));
+		Result qrCodeResult = new MultiFormatReader().decode(binaryBitmap,hintMap);
+                fi.close();
+		return qrCodeResult.getText();
+        }finally{
+            
+        }
+	}
+    
+}
