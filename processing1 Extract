@@ -1,0 +1,29 @@
+package processing;
+
+import bean.Citizen;
+
+public class ExtractCitizen {
+    private static Citizen c;
+    private static char[] temp;
+    @SuppressWarnings("empty-statement")
+    public static Citizen extractCitizen(String PDFtext)throws Exception{//Function to extract info from text extracted from PDF
+        int index;
+        index = PDFtext.lastIndexOf("आधार");
+        int i;
+        temp=new char[300];
+        temp=PDFtext.toCharArray();
+        c=new Citizen();
+        c.setName(PDFtext.substring(PDFtext.indexOf("ss")+4,PDFtext.indexOf("S/O")-1));
+        for(i=PDFtext.lastIndexOf("S/O")+1;temp[i]!=',';i++);
+        c.setFname(PDFtext.substring(PDFtext.lastIndexOf("S/O")+4,i));
+        c.setDob(PDFtext.substring(PDFtext.lastIndexOf("DOB")+5,PDFtext.lastIndexOf("DOB")+15));
+       if(PDFtext.contains("MALE"))
+           c.setGen("MALE");
+       else
+           c.setGen("FEMALE");
+       c.setAdd(PDFtext.substring(i+1,PDFtext.lastIndexOf("DOB")-12));
+       c.setAadhar(PDFtext.substring(index-16,index-12)+PDFtext.substring(index-11,index-7)+PDFtext.substring(index-6,index-2));
+       return c;   
+    }
+    
+}
