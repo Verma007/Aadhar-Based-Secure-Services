@@ -1,0 +1,198 @@
+package digitization.of.eaadhar;
+
+import bean.Citizen;
+import dao.DataBaseFunction;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.Border;
+class DisplayData extends DataBaseFunction implements ActionListener,WindowListener{
+    private static JFrame f2;
+    private static JLabel l3,l4,l5,l6,l7,l8,l9,l12,l13,l14,l15,l16,l17,l18,l19,l20;
+    private static JButton b1,b2;
+    private static ImageIcon icon;
+    private static Font f;
+    private static Frame pf;
+    Border b=BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0));
+    Citizen c;
+    public DisplayData(Citizen c,String type,Frame pf) {
+                    //Initilize components
+        this.pf=pf;
+        this.c=c;
+        f=new Font("Arial", 1,16);
+        File file = new File(c.getImagelocation()+"/img_7.jpg");
+        BufferedImage image;
+        try {
+            image = ImageIO.read(file);
+            icon = new ImageIcon(image);
+        } catch (IOException ex) {
+          f2.dispose();
+         new File(c.getImagelocation()+"/img_7.jpg").delete();
+         pf.setEnabled(true);  
+        }
+        f2=new JFrame("Citizen Data-"+c.getAadharnumber());
+        l3=new JLabel("Name-");
+        l4=new JLabel("Aadhar No.-");
+        l5=new JLabel("Father's Name-");
+        l6=new JLabel("DOB-");
+        l7=new JLabel("Aadress-");
+        l8=new JLabel("Gender-");
+        l9=new JLabel("PIN-");
+        l20=new JLabel();
+        l12=new JLabel(c.getName());
+        l13=new JLabel(c.getAadharnumber());
+        l14=new JLabel(c.getFname());
+        l15=new JLabel(c.getDob());
+        l16=new JLabel(c.getAdd());
+        l17=new JLabel(c.getGen());
+        l18=new JLabel(c.getPin());
+        l19=new JLabel(icon);
+        b1=new JButton("OK");
+        if(type.equals("save"))
+            b1.setText("SAVE");
+        b2=new JButton("CANCEL");
+                     //Set Layout
+        l20.setLayout(null);
+        f2.setLayout(null);
+                     //Set Border
+        l19.setBorder(b);
+        l20.setBorder(b);
+        l3.setBorder(b);
+        l4.setBorder(b);
+        l5.setBorder(b);
+        l6.setBorder(b);
+        l7.setBorder(b);
+        l8.setBorder(b);
+        l9.setBorder(b);
+        l12.setBorder(b);
+        l13.setBorder(b);
+        l14.setBorder(b);
+        l15.setBorder(b);
+        l16.setBorder(b);
+        l17.setBorder(b);
+        l18.setBorder(b);
+        f2.setSize(500,400);
+        f2.setLocation(400,150);
+                       //Set Font
+        l3.setFont(f);
+        l4.setFont(f);
+        l5.setFont(f);
+        l6.setFont(f);
+        l7.setFont(f);
+        l8.setFont(f);
+        l9.setFont(f);
+                        //Set Bounds
+        l20.setBounds(5,5,470,275);
+        l3.setBounds(10,20,120,30);
+        l4.setBounds(10,51,120,30);
+        l5.setBounds(10,82,120,30);
+        l6.setBounds(10,113,120,30);
+        l8.setBounds(10,144,120,30);
+        l9.setBounds(10,175,120,30);
+        l7.setBounds(10,206,120,30);
+        l12.setBounds(130,20,200,30);
+        l13.setBounds(130,51,200,30);
+        l14.setBounds(130,82,200,30);
+        l15.setBounds(130,113,200,30);
+        l18.setBounds(130,175,200,30);
+        l17.setBounds(130,144,200,30);
+        l16.setBounds(130,206,200,30);
+        l19.setBounds(333,20,130,180);
+        b1.setBounds(50,300,100,30);
+        b2.setBounds(330,300,100,30);
+                       //Add Action Listener
+        b1.addActionListener(this);
+        b2.addActionListener(this);
+                       //Add to frame
+        l20.add(l3);
+        l20.add(l4);
+        l20.add(l5);
+        l20.add(l6);
+        l20.add(l7);
+        l20.add(l8);
+        l20.add(l12);
+        l20.add(l13);
+        l20.add(l14);
+        l20.add(l15);
+        l20.add(l16);
+        l20.add(l17);
+        l20.add(l18);
+        l20.add(l9);
+        l20.add(l19);
+        f2.add(l20);
+        f2.add(b1);
+        f2.add(b2);
+        f2.setResizable(false);
+        f2.addWindowListener(this);
+        f2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f2.setVisible(true);
+        
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if(ae.getSource()==b1&&b1.getText().equals("SAVE")){
+            try { 
+                DataBaseFunction.insert(c);
+                f2.dispose();
+                f2=null;
+                new File(c.getImagelocation()+"/img_7.jpg").delete();
+                pf.setEnabled(true);
+            } catch (Exception ex) {
+                pf.setEnabled(true);
+                f2.dispose();
+                f2=null;
+                 new File(c.getImagelocation()+"/img_7.jpg").delete();
+                System.out.println("Display-"+ex.getMessage());
+               }
+        }else{
+         f2.dispose();
+         f2=null;
+         new File(c.getImagelocation()+"/img_7.jpg").delete();
+         pf.setEnabled(true);
+        }
+       
+    }
+
+    @Override
+    public void windowOpened(WindowEvent we) {
+      
+    }
+
+    @Override
+    public void windowClosing(WindowEvent we) {
+         new File(c.getImagelocation()+"/img_7.jpg").delete();
+         pf.setEnabled(true);  
+    }
+
+    @Override
+    public void windowClosed(WindowEvent we) {
+      
+    }
+
+    @Override
+    public void windowIconified(WindowEvent we) {
+      
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent we) {
+       
+    }
+
+    @Override
+    public void windowActivated(WindowEvent we) {
+        
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent we) {
+       
+    }
+     
+    
+}
