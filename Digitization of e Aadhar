@@ -1,0 +1,220 @@
+package digitization.of.eaadhar;
+
+import bean.Citizen;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import dao.DataBaseFunction;
+import java.awt.Font;
+import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.EnumMap;
+import java.util.Map;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import processing.ExtractCitizen;
+import processing.ExtractImage;
+import processing.ExtractTextFromPDF;
+import processing.ReadQRCode;
+import processing.ValidateAadhar;
+
+public class DigitizationOfEAadhar extends DataBaseFunction implements WindowListener,ActionListener {
+    static private JFrame f1;
+    static private JButton b1,b2,b6;
+    static private JLabel l1,l2,l11,l12,l19,l20,l21,l22,l23;
+    static private Font f;
+    static private DigitizationOfEAadhar doa;
+    static private JTextField tf,tf1;
+    static private File selectedFile;
+    static private String pin;
+    public static void main(String[] args) {
+                             //Initilize components.
+        doa=new DigitizationOfEAadhar();
+        tf=new JTextField();
+        tf1=new JTextField();
+        f=new Font("Arial", 1,16);
+        l1=new JLabel("EAadhar-");
+        l2=new JLabel("Aadhar No.-");
+        l11=new JLabel("Select EAadhar PDF file.");
+        l12=new JLabel();
+        l20=new JLabel();
+        l19=new JLabel("PIN Code-");
+        l21=new JLabel();
+        l22=new JLabel();
+        l23=new JLabel();
+        b1=new JButton("Digitize");
+        b2=new JButton("Search");
+        b6=new JButton("File");
+        f1=new JFrame("Digitization of EAadhar");
+        f1.setSize(500,400);
+        f1.setLocation(400,150);
+        b1.addActionListener(doa);          //add actionlistener
+        b2.addActionListener(doa);          //add actionlistener
+        b6.addActionListener(doa);          //add actionlistener
+        f1.addWindowListener(doa);          //add actionlistener
+        f1.setLayout(null);
+        l11.setLayout(null);
+        l21.setLayout(null);
+        l22.setLayout(null);
+        l1.setFont(f);
+        l19.setFont(f);
+        l2.setFont(f);
+        b1.setFont(f);
+        b6.setFont(f);
+        b2.setFont(f);
+        tf.setFont(f);
+                                    //Set Bounds
+        l1.setBounds(20,20,80,30);
+        l21.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        l22.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        l12.setBorder(BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        l21.setBounds(20,30,440,150);
+        l22.setBounds(20,230,440,80);
+        l12.setBounds(100,20,300,30);
+        b6.setBounds(230,0,70, 30);
+        l11.setBounds(0,0,230,30);
+        b1.setBounds(100,110,100,30);
+        l2.setBounds(20,20,90,30);
+        tf.setBounds(120,20,220,30);
+        b2.setBounds(340,20,90,30);
+        l19.setBounds(20,65,80,30);
+        tf1.setBounds(100,65,230,30);
+        l20.setBounds(210,105,220,30);
+        l23.setBounds(120, 50, 220,30);
+                                   //Add to Jlable
+        l12.add(l11);
+        l12.add(b6);
+        l21.add(l1);
+        l21.add(l12);
+        l21.add(tf1);
+        l21.add(l19);
+        l21.add(b1);
+        l21.add(l20);
+        l22.add(l2);
+        l22.add(tf);
+        l22.add(b2);
+        l22.add(l23);
+                                   //Add to frame
+        f1.add(l21);
+        f1.add(l22);
+        f1.setResizable(false);
+        f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f1.setVisible(true);
+        }
+                         //ActionListener response
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        String text,QRtext;
+        Citizen c;
+        String charset = "UTF-8"; // or "ISO-8859-1"
+	Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new EnumMap<>(EncodeHintType.class);
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+        if(ae.getSource()==b1){             //Digitize button is pressed
+            if(l11.getText().equals("Select EAadhar PDF file.")){
+                l20.setText("Select EAadhar");
+            }else{
+                try {
+                    l20.setText(" ");
+                    pin=tf1.getText().trim();
+                    text=ExtractTextFromPDF.extractTextFromPDF(selectedFile.getPath(),pin,0,610,520,300);
+                    c=ExtractCitizen.extractCitizen(text);
+                    c.setPin(pin);
+                    c.setImagelocation("c:\\Aadhardata");
+                    ExtractImage.extractImage(selectedFile.getPath(),c.getImagelocation(),pin);
+                    QRtext=ReadQRCode.readQRCode(c.getImagelocation()+"/img_6.png", charset, hintMap);
+                    new File(c.getImagelocation()+"/img_6.png").delete();
+                    if(ValidateAadhar.validateAadhar(QRtext,c)==1){
+                    new DisplayData(c,"save",f1); 
+                     f1.setEnabled(false);
+                    }else{
+                      l20.setText("Selected file is not valid");  
+                    }
+                } catch (Exception ex) {
+                   if(ex.getMessage().contains("password")){
+                    l20.setText("PIN code is wrong");
+                   }else{
+                    l20.setText("Selected file is not valid");   
+                   }
+                }
+                
+                
+            }
+            
+        }else if(ae.getSource()==b2){        //Search button is pressed
+         String aadhar;
+         aadhar=tf.getText();
+            try {
+               c=search(aadhar);
+               if(c.getName()==null){
+                l23.setText("Record not found in Database");   
+               }else{
+                  l23.setText(" "); 
+               new DisplayData(c,"display",f1);
+                f1.setEnabled(false);
+               }
+            } catch (Exception ex) {
+                l23.setText("Record not found in Database");
+            }
+         
+        }else if(ae.getSource()==b6){ 
+            //File button is pressed
+            l20.setText(" ");
+            tf1.setText(" ");
+         JFileChooser  fileDialog;
+         fileDialog=new JFileChooser();
+         FileNameExtensionFilter filter = new FileNameExtensionFilter("PDF Files only", "pdf");
+         fileDialog.setFileFilter(filter);
+         fileDialog.setCurrentDirectory(new File(System.getProperty("user.home")));
+         int result = fileDialog.showOpenDialog(f1);
+         if (result == JFileChooser.APPROVE_OPTION) {
+             selectedFile = fileDialog.getSelectedFile();
+             l11.setText(selectedFile.getPath());
+                   }
+        }
+    }
+
+    @Override
+    public void windowOpened(WindowEvent we) {
+       try {
+           Files.createDirectories(Paths.get("c:\\Aadhardata"));
+           new File("c:\\Aadhardata\\img_7.jpg").delete();
+       } catch (IOException ex) {
+           l20.setText("Error");
+         System.out.println(ex.getMessage());
+       }
+    }
+
+    @Override
+    public void windowClosing(WindowEvent we) {
+       
+    }
+
+    @Override
+    public void windowClosed(WindowEvent we) {
+     f1=null;
+     
+    }
+
+    @Override
+    public void windowIconified(WindowEvent we) {
+       
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent we) {
+       
+    }
+
+    @Override
+    public void windowActivated(WindowEvent we) {
+       
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent we) {
+        
+    }
+    
+}
