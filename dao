@@ -1,0 +1,103 @@
+package dao;
+
+import bean.Citizen;
+import com.healthmarketscience.jackcess.ColumnBuilder;
+import com.healthmarketscience.jackcess.CursorBuilder;
+import com.healthmarketscience.jackcess.DataType;
+import com.healthmarketscience.jackcess.Database;
+import com.healthmarketscience.jackcess.DatabaseBuilder;
+import com.healthmarketscience.jackcess.IndexBuilder;
+import com.healthmarketscience.jackcess.IndexCursor;
+import com.healthmarketscience.jackcess.Row;
+import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.TableBuilder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.imageio.stream.FileImageOutputStream;
+
+public class DataBaseFunction {
+    static private Database db;
+    static private Table table;
+    static protected void insert(Citizen c){
+      File file=null,file1=null;
+      InputStream inputStream = null;
+                 //open existing database
+      try {
+            file1=new File(c.getImagelocation()+"/img_7.jpg");
+            inputStream = new FileInputStream(file1);
+            file=new File(c.getImagelocation()+"/eadb.mdb");
+            db = DatabaseBuilder.open(file);
+            table = db.getTable("eadbt");
+        } catch (Exception e) {
+          try {  //if not found create new database
+              db = new DatabaseBuilder(file).setFileFormat(Database.FileFormat.V2010).create();
+          } catch (Exception ex) {
+              System.out.println("database"+ex.getMessage());
+          }
+          try {
+              table = new TableBuilder("eadbt")
+                      .addColumn(new ColumnBuilder("aadhar", DataType.TEXT))
+                      .addIndex(new IndexBuilder(IndexBuilder.PRIMARY_KEY_NAME).addColumns("aadhar").setPrimaryKey())
+                      .addIndex(new IndexBuilder("Aadhar").addColumns("aadhar"))
+                      .addColumn(new ColumnBuilder("name", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("fname", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("dob", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("address", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("gen", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("pin", DataType.TEXT))
+                      .addColumn(new ColumnBuilder("image", DataType.OLE))
+                      .toTable(db);
+          } catch (Exception ex) {
+               System.out.println("table-"+ex.getMessage());
+          }
+       
+     } 
+      finally{
+          try {    //insert into database
+              table.addRow(c.getAadharnumber(),c.getName().trim(),c.getFname(),c.getDob(),c.getAdd(),c.getGen(),c.getPin(),inputStream);
+              db.close();
+              inputStream.close();
+              } catch (Exception ex) {
+              try {
+                  db.close();
+                  inputStream.close();
+              } catch (IOException ex1) {
+             
+              }
+               System.out.println("Row-"+ex.getMessage());
+              
+          }
+    }}
+    static protected Citizen search(String aadhar) throws Exception{ 
+        InputStream inputStream = null;
+        Citizen c=new Citizen();
+        db = DatabaseBuilder.open(new File("c:\\Aadhardata\\eadb.mdb"));
+        table = db.getTable("eadbt"); 
+        IndexCursor cursor = CursorBuilder.createCursor(table.getIndex("Aadhar"));
+        for(Row row : cursor.newEntryIterable(aadhar)) {
+        c.setAadhar(aadhar);
+        c.setName((String) row.get("name"));
+        c.setFname((String) row.get("fname"));
+        c.setDob((String) row.get("dob"));
+        c.setGen((String) row.get("gen"));
+        c.setAdd((String) row.get("address"));
+        c.setPin((String) row.get("pin"));
+        c.setImagelocation("c:\\Aadhardata");
+        try {
+        byte[] img=row.getBytes("image");
+        String newFileName = "c:\\Aadhardata\\img_7.jpg";
+        FileImageOutputStream imageOutput = new FileImageOutputStream(new File(newFileName));
+        imageOutput.write(img, 0, img.length);
+        imageOutput.close();
+        db.close();
+        } catch (Exception e) {
+        System.out.println("Search-"+e.getMessage());
+        }
+     }
+        
+        return c;
+        
+    }
+}
