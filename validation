@@ -1,0 +1,15 @@
+package processing;
+
+import bean.Citizen;
+
+public class ValidateAadhar {
+    public static int validateAadhar(String QRtext,Citizen c)throws Exception{ //function to validate EAdhar on the basis of info present in QR code
+        if(QRtext.contains((c.getPin()))&&QRtext.contains(c.getAadhar())){ 
+            return 1;
+        } else {
+            return 0;
+        }
+            
+        }
+    
+}
